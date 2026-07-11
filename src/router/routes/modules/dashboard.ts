@@ -7,8 +7,9 @@ const DASHBOARD_ROUTE: AppRouteRecordRaw = {
     name: 'dashboard',
     component: DEFAULT_LAYOUT,
     meta: {
-        requiresAuth: false,
+        requiresAuth: true,
         title: 'Dashboard',
+        roles: ['*'],
     },
     children: [
         {
@@ -16,8 +17,9 @@ const DASHBOARD_ROUTE: AppRouteRecordRaw = {
             name: 'dashboard-home',
             component: () => import('@/views/dashboard/index.vue'),
             meta: {
-                requiresAuth: false,
+                requiresAuth: true,
                 title: 'Dashboard Home',
+                roles: ['*'],
             },
         },
     ],
