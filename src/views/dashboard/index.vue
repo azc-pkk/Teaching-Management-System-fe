@@ -99,9 +99,4 @@ const featureCards: FeatureCard[] = [
     iconClass: 'text-emerald-600',
   },
 ]
-
-interface Stat {
-  label: string
-  value: string
-}
 </script>
