@@ -19,8 +19,13 @@ declare module 'vue' {
     ElInput: typeof import('element-plus/es')['ElInput']
     ElLayoutFooter: typeof import('element-plus/es')['ElLayoutFooter']
     ElLink: typeof import('element-plus/es')['ElLink']
+    ElMenu: typeof import('element-plus/es')['ElMenu']
+    ElMenuItem: typeof import('element-plus/es')['ElMenuItem']
+    ElSubMenu: typeof import('element-plus/es')['ElSubMenu']
     Footer: typeof import('./../components/footer/index.vue')['default']
+    Menu: typeof import('./../components/menu/index.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    TopBar: typeof import('./../components/top-bar/index.vue')['default']
   }
 }
