@@ -14,7 +14,9 @@ const useAuthStore = defineStore('auth', {
     },
 
     actions: {
+        async login(username: string, password: string) {
 
+        }
     },
 });
 
