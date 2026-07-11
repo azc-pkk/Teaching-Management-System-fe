@@ -1,8 +1,8 @@
-import type { RouteRecordNormalized } from 'vue-router';
+import type { AppRouteRecordRaw } from './types';
 
 const modules = import.meta.glob('./modules/*.ts', { eager: true });
 
-function formatModules(_module: any, result: RouteRecordNormalized[]) {
+function formatModules(_module: any, result: AppRouteRecordRaw[]) {
     Object.keys(_module).forEach((key) => {
         const defaultModule = _module[key].default;
         if (!defaultModule) return;
@@ -14,4 +14,4 @@ function formatModules(_module: any, result: RouteRecordNormalized[]) {
     return result;
 }
 
-export const appRoutes: RouteRecordNormalized[] = formatModules(modules, []);
+export const appRoutes: AppRouteRecordRaw[] = formatModules(modules, []);

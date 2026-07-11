@@ -1,16 +1,25 @@
-import { defineComponent } from 'vue';
-import type { NavigationGuard, RouteMeta } from 'vue-router';
+import type { Component } from 'vue';
+import type { NavigationGuard, RouteMeta, RouteRecordRedirectOption } from 'vue-router';
 
-export type Component<T = any> =
-    | ReturnType<typeof defineComponent>
+export type AsyncComponent<T = any> =
+    | ReturnType<typeof import('vue').defineComponent>
     | (() => Promise<T>);
+
+export interface AppRouteMeta extends RouteMeta {
+    requiresAuth?: boolean;
+    title?: string;
+    menuTitle?: string;
+    icon?: Component;
+    hideInMenu?: boolean;
+    roles?: string[];
+}
 
 export interface AppRouteRecordRaw {
     path: string;
     name?: string | symbol;
-    meta?: RouteMeta;
-    redirect?: string;
-    component: Component | string;
+    meta?: AppRouteMeta;
+    redirect?: RouteRecordRedirectOption;
+    component?: AsyncComponent | string;
     children?: AppRouteRecordRaw[];
     alias?: string | string[];
     props?: Record<string, any>;

@@ -23,6 +23,7 @@
     "@unocss/preset-attributify": "^66.7.5",
     "@unocss/preset-uno": "^66.7.5",
     "@vitejs/plugin-vue": "^6.0.7",
+    "@vitejs/plugin-vue-jsx": "^5.1.6",
     "@vue/eslint-config-typescript": "^14.9.0",
     "@vue/tsconfig": "^0.9.1",
     "eslint": "^10.6.0",
