@@ -2,9 +2,9 @@ import type { LocationQueryRaw, Router } from 'vue-router';
 import useAuthStore from '@/store/modules/auth';
 
 export default function setupUserLoginInfoGuard(router: Router) {
-    router.beforeEach((to, from, next) => {
+    router.beforeEach((to, _from, next) => {
         const authStore = useAuthStore();
-        next();
+        // next();
         if (authStore.isLogin) {
             next();
         } else {

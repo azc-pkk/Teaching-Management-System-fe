@@ -24,20 +24,27 @@ const useAuthStore = defineStore('auth', {
             try {
                 const response = await loginApi({ username, password });
 
-                // TODO: fail
-
-                // FiXME: remove it at backend
-                const removeBearerPrefix = (token: string) => {
-                    if (token.startsWith('Bearer '))
-                        return token.slice(7);
-                    return token;
-                };
+                console.log(
+                    '%c[auth] login response',
+                    'color: #16a34a; font-weight: bold',
+                )
+                console.log('  raw response:', response.data)
+                console.log('  user:', response.data.data.user)
+                console.log('  token:', response.data.data.token)
 
                 this.$patch((state) => {
                     state.userId = response.data.data.user.id;
                     state.role = response.data.data.user.role;
-                    state.accessToken = removeBearerPrefix(response.data.data.token);
+                    state.accessToken = response.data.data.token;
                 })
+
+                console.log(
+                    '%c[auth] state after patch',
+                    'color: #2563eb; font-weight: bold',
+                    'userId =', this.userId,
+                    ', role =', this.role,
+                    ', isLogin =', this.isLogin,
+                )
             } catch (error) {
                 this.resetAuth();
                 throw error;

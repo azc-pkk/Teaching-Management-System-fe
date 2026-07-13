@@ -79,10 +79,6 @@
       <template #header>
         <div class="flex items-center justify-between">
           <span class="font-medium">教师列表</span>
-          <el-button type="primary" plain size="small" @click="handleAdd">
-            <el-icon class="mr-1"><Plus /></el-icon>
-            新增教师
-          </el-button>
         </div>
       </template>
 
