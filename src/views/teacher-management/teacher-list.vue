@@ -18,13 +18,13 @@
             v-model="filters.departmentId"
             placeholder="全部院系"
             clearable
-            class="w-40"
+            class="w-40!"
           >
             <el-option
               v-for="dept in departmentOptions"
               :key="dept.id"
               :label="dept.name"
-              :value="dept.id"
+              :value="dept.id ?? 0"
             />
           </el-select>
         </el-form-item>
@@ -34,7 +34,7 @@
             v-model="filters.teacherType"
             placeholder="全部类型"
             clearable
-            class="w-40"
+            class="w-40!"
           >
             <el-option
               v-for="t in teacherTypeOptions"
@@ -50,7 +50,7 @@
             v-model="filters.title"
             placeholder="全部职称"
             clearable
-            class="w-40"
+            class="w-40!"
           >
             <el-option
               v-for="t in titleOptions"
@@ -138,6 +138,8 @@ import {
   Refresh,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { getTeacherList as getListApi, getTeacherFilterOptions as getOptionsApi } from '@/api/teacher'
+import type { Department } from '@/api/teacher'
 
 const loading = ref(false)
 const tableData = ref<Teacher[]>([])
@@ -155,75 +157,64 @@ const pagination = reactive({
   total: 0,
 })
 
-interface DepartmentOption {
-  id: number
-  name: string
-}
-
-const departmentOptions = ref<DepartmentOption[]>([])
+const departmentOptions = ref<Department[]>([])
 const teacherTypeOptions = ref<string[]>([])
 const titleOptions = ref<string[]>([])
 
 async function fetchTeachers() {
   loading.value = true
   try {
-    // TODO: 调用后端接口
-    // const params: TeacherQueryParams = {
-    //   keyword: filters.keyword,
-    //   departmentId: filters.departmentId,
-    //   teacherType: filters.teacherType,
-    //   title: filters.title,
-    //   page: pagination.page,
-    //   pageSize: pagination.pageSize,
-    // }
-    // const res = await teacherApi.query(params)
-    // tableData.value = res.data.data.list
-    // pagination.total = res.data.data.total
-  } catch (error) {
-    ElMessage.error('获取教师列表失败')
+    const response = await getListApi({
+      keyword: filters.keyword || undefined,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      departmentId: filters.departmentId,
+      teacherType: filters.teacherType,
+      title: filters.title,
+    });
+
+    if (!response.data.success) throw new Error('获取教师列表失败');
+
+    const page = response.data.data;
+    tableData.value = page?.list ?? [];
+    pagination.total = page?.total ?? 0;
+
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '未知错误');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-async function fetchDepartmentOptions() {
-  // TODO: 从后端获取院系列表
-  // departmentOptions.value = (await departmentApi.list()).data.data
-}
-
 async function fetchFilterOptions() {
-  // TODO: 从后端获取教师类型 / 职称的可选值
-  // const res = await teacherApi.getFilterOptions()
-  // teacherTypeOptions.value = res.data.data.teacherTypes
-  // titleOptions.value = res.data.data.titles
+  const response = await getOptionsApi();
+  const options = response.data.data;
+  departmentOptions.value = options?.departments ?? [];
+  teacherTypeOptions.value = options?.teacherTypes ?? [];
+  titleOptions.value = options?.titles ?? [];
 }
 
 function handleSearch() {
-  pagination.page = 1
-  fetchTeachers()
+  pagination.page = 1;
+  fetchTeachers();
 }
 
 function handleReset() {
-  filters.keyword = ''
-  filters.departmentId = undefined
-  filters.teacherType = undefined
-  filters.title = undefined
-  pagination.page = 1
-  fetchTeachers()
+  filters.keyword = '';
+  filters.departmentId = undefined;
+  filters.teacherType = undefined;
+  filters.title = undefined;
+  pagination.page = 1;
+  fetchTeachers();
 }
 
 function handlePageChange() {
-  fetchTeachers()
+  fetchTeachers();
 }
 
 function handleSizeChange() {
-  pagination.page = 1
-  fetchTeachers()
-}
-
-function handleAdd() {
-  // TODO: 跳转新增页
-  ElMessage.info('新增教师（待实现）')
+  pagination.page = 1;
+  fetchTeachers();
 }
 
 function handleEdit(_row: Teacher) {
@@ -246,8 +237,7 @@ function handleDelete(row: Teacher) {
 }
 
 onMounted(() => {
-  fetchDepartmentOptions()
-  fetchFilterOptions()
-  fetchTeachers()
+  fetchFilterOptions();
+  fetchTeachers();
 })
 </script>

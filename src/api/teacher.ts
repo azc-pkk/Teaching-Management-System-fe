@@ -12,11 +12,11 @@ export interface Teacher {
 }
 
 export interface TeacherPageResponse {
-    data?: Data;
+    data?: TeacherPageData;
     success?: boolean;
 }
 
-export interface Data {
+export interface TeacherPageData {
     list?: Teacher[];
     page?: number;
     pageSize?: number;
@@ -34,4 +34,24 @@ export interface GetTeacherListRequest {
 
 export function getTeacherList(params: GetTeacherListRequest) {
     return axios.get<TeacherPageResponse>('/api/teachers', { params });
+}
+
+export interface getOptionsResponse {
+    data?: Options;
+    success?: boolean;
+}
+
+export interface Options {
+    departments?: Department[];
+    teacherTypes?: string[];
+    titles?: string[];
+}
+
+export interface Department {
+    id?: number;
+    name?: string;
+}
+
+export function getTeacherFilterOptions() {
+    return axios.get<getOptionsResponse>('/api/teachers/options');
 }

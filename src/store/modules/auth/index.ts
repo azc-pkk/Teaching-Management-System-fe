@@ -24,6 +24,7 @@ const useAuthStore = defineStore('auth', {
             try {
                 const response = await loginApi({ username, password });
 
+                // TODO: Fail
                 console.log(
                     '%c[auth] login response',
                     'color: #16a34a; font-weight: bold',
