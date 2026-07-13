@@ -13,6 +13,7 @@ const DASHBOARD_ROUTE: AppRouteRecordRaw = {
         menuTitle: '首页',
         icon: HomeFilled,
         roles: ['*'],
+        order: 0,
     },
     children: [
         {
@@ -24,6 +25,7 @@ const DASHBOARD_ROUTE: AppRouteRecordRaw = {
                 title: 'Dashboard Home',
                 hideInMenu: true,
                 roles: ['*'],
+                order: 0,
             },
         },
     ],

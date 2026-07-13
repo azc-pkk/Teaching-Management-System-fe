@@ -11,6 +11,7 @@ const TEACHER_MANAGEMENT_ROUTE: AppRouteRecordRaw = {
         menuTitle: '教师管理',
         icon: UserFilled,
         roles: ['admin'],
+        order: 10,
     },
     children: [
         {
@@ -24,6 +25,7 @@ const TEACHER_MANAGEMENT_ROUTE: AppRouteRecordRaw = {
                 icon: List,
                 hideInMenu: false,
                 roles: ['admin'],
+                order: 0,
             },
         },
         {
@@ -37,6 +39,7 @@ const TEACHER_MANAGEMENT_ROUTE: AppRouteRecordRaw = {
                 icon: Plus,
                 hideInMenu: false,
                 roles: ['admin'],
+                order: 10,
             },
         },
         {
@@ -48,6 +51,7 @@ const TEACHER_MANAGEMENT_ROUTE: AppRouteRecordRaw = {
                 title: 'Modify Teacher',
                 hideInMenu: true,
                 roles: ['admin'],
+                order: 99,
             },
         },
     ]

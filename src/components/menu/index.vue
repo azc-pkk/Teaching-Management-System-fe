@@ -79,6 +79,7 @@ interface MenuMeta {
   menuTitle?: string
   icon?: Component
   hideInMenu?: boolean
+  order?: number
 }
 
 const route = useRoute()
@@ -101,9 +102,13 @@ const openMenus = computed(() => {
 })
 
 const menuRoutes = computed(() =>
-  appRoutes.filter(
-    (r) => r.meta?.hideInMenu !== true && r.meta?.menuTitle,
-  ),
+  appRoutes
+    .filter((r) => r.meta?.hideInMenu !== true && r.meta?.menuTitle)
+    .sort((a, b) => {
+      const ao = (a.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      const bo = (b.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      return ao - bo
+    }),
 )
 
 function meta(r: RouteRecordNormalized): MenuMeta | undefined {
@@ -124,7 +129,13 @@ function isVisibleChild(child: RouteRecordRaw): boolean {
 
 function getVisibleChildren(route: RouteRecordNormalized): RouteRecordRaw[] {
   if (!route.children) return []
-  return route.children.filter(isVisibleChild)
+  return route.children
+    .filter(isVisibleChild)
+    .sort((a, b) => {
+      const ao = (a.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      const bo = (b.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      return ao - bo
+    })
 }
 
 function resolvePath(parentPath: string, childPath: string): string {

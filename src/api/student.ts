@@ -12,10 +12,10 @@ export interface Student {
 }
 
 export type StudentStatus =
-    | 'Enrolled'
-    | 'Graduated'
-    | 'Suspended'
-    | 'Withdrawn';
+    | 'ENROLLED'
+    | 'GRADUATED'
+    | 'SUSPENDED'
+    | 'WITHDRAWN';
 
 export interface ClassGroup {
     id: number;

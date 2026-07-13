@@ -207,17 +207,17 @@ import {
 import { useRouter } from 'vue-router'
 
 const statusLabel: Record<StudentStatus, string> = {
-  Enrolled: '在读',
-  Graduated: '已毕业',
-  Suspended: '休学',
-  Withdrawn: '退学',
+  ENROLLED: '在读',
+  GRADUATED: '已毕业',
+  SUSPENDED: '休学',
+  WITHDRAWN: '退学',
 }
 
 const statusTagType: Record<StudentStatus, 'success' | 'info' | 'warning' | 'danger'> = {
-  Enrolled: 'success',
-  Graduated: 'info',
-  Suspended: 'warning',
-  Withdrawn: 'danger',
+  ENROLLED: 'success',
+  GRADUATED: 'info',
+  SUSPENDED: 'warning',
+  WITHDRAWN: 'danger',
 }
 
 const router = useRouter()
@@ -240,7 +240,7 @@ const pagination = reactive({
 
 const classGroupOptions = ref<ClassGroup[]>([])
 const gradeOptions = ref<number[]>([])
-const statusOptions = ref<StudentStatus[]>(['Enrolled', 'Graduated', 'Suspended', 'Withdrawn'])
+const statusOptions = ref<StudentStatus[]>(['ENROLLED', 'GRADUATED', 'SUSPENDED', 'WITHDRAWN'])
 
 async function fetchStudents() {
   loading.value = true
