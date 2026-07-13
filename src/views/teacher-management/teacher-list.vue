@@ -140,6 +140,9 @@ import {
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getTeacherList as getListApi, getTeacherFilterOptions as getOptionsApi } from '@/api/teacher'
 import type { Department } from '@/api/teacher'
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
 
 const loading = ref(false)
 const tableData = ref<Teacher[]>([])
@@ -218,8 +221,12 @@ function handleSizeChange() {
 }
 
 function handleEdit(_row: Teacher) {
-  // TODO: 跳转编辑页
-  ElMessage.info(`编辑教师：${_row.name}（待实现）`)
+  router.push({
+    name: 'teacher-management-modify-teacher',
+    params: {
+      id: _row.id,
+    }
+  })
 }
 
 function handleDelete(row: Teacher) {
