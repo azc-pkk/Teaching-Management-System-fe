@@ -1,7 +1,7 @@
-import { defineComponent } from 'vue';
+import type { defineComponent } from 'vue';
 import type { NavigationGuard, RouteMeta } from 'vue-router';
 
-export type Component<T = any> =
+export type AsyncComponent<T = any> =
     | ReturnType<typeof defineComponent>
     | (() => Promise<T>);
 
@@ -10,7 +10,7 @@ export interface AppRouteRecordRaw {
     name?: string | symbol;
     meta?: RouteMeta;
     redirect?: string;
-    component: Component | string;
+    component?: AsyncComponent | string;
     children?: AppRouteRecordRaw[];
     alias?: string | string[];
     props?: Record<string, any>;

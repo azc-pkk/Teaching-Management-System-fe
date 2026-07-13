@@ -4,6 +4,8 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
 
     /* 路径别名 —— 与 vite.config.ts 的 resolve.alias 对齐 */
     "paths": {

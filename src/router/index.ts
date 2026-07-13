@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import { appRoutes } from './routes'
 import { NOT_FOUND_ROUTE } from './routes/base'
@@ -19,17 +19,9 @@ const router = createRouter({
         requiresAuth: false,
       }
     },
-    // {
-    //     path: '/register',
-    //     name: 'register',
-    //     component: () => import('@/views/register/index.vue'),
-    //     meta: {
-    //         requiresAuth: false,
-    //     }
-    // },
-    ...appRoutes,
+    ...appRoutes as RouteRecordRaw[],
     NOT_FOUND_ROUTE,
-  ],
+  ] as RouteRecordRaw[],
 })
 
 createRouterGuard(router)

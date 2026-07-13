@@ -1,4 +1,5 @@
 import type { AppRouteRecordRaw } from '../types'
+import { HomeFilled } from '@element-plus/icons-vue'
 
 const DEFAULT_LAYOUT = () => import('@/layout/default-layout.vue')
 
@@ -9,6 +10,8 @@ const DASHBOARD_ROUTE: AppRouteRecordRaw = {
     meta: {
         requiresAuth: true,
         title: 'Dashboard',
+        menuTitle: '首页',
+        icon: HomeFilled,
         roles: ['*'],
     },
     children: [
@@ -19,6 +22,7 @@ const DASHBOARD_ROUTE: AppRouteRecordRaw = {
             meta: {
                 requiresAuth: true,
                 title: 'Dashboard Home',
+                hideInMenu: true,
                 roles: ['*'],
             },
         },
