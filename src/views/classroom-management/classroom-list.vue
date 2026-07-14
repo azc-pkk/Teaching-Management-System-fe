@@ -77,17 +77,6 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="最小容量">
-          <el-input-number
-            v-model="filters.minCapacity"
-            :min="1"
-            :max="999"
-            controls-position="right"
-            placeholder="不限"
-            class="w-32!"
-          />
-        </el-form-item>
-
         <el-form-item>
           <el-button type="primary" @click="handleSearch">
             <el-icon class="mr-1"><Search /></el-icon>
@@ -175,21 +164,23 @@ import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import {
   getClassroomList as getListApi,
   getClassroomFilterOptions as getOptionsApi,
+  deleteClassroom as deleteApi,
   type Classroom,
   type ClassroomStatus,
 } from '@/api/classroom'
+import checkResponse from '@/utils/checkResponse'
 import { useRouter } from 'vue-router'
 
 const statusLabel: Record<ClassroomStatus, string> = {
   AVAILABLE: '可用',
-  MAINTENANCE: '维护中',
   OCCUPIED: '占用中',
+  MAINTENANCE: '维护中',
 }
 
 const statusTagType: Record<ClassroomStatus, 'success' | 'warning' | 'danger'> = {
   AVAILABLE: 'success',
-  MAINTENANCE: 'warning',
   OCCUPIED: 'danger',
+  MAINTENANCE: 'warning',
 }
 
 const router = useRouter()
@@ -203,7 +194,6 @@ const filters = reactive({
   building: undefined as string | undefined,
   type: undefined as string | undefined,
   status: undefined as ClassroomStatus | undefined,
-  minCapacity: undefined as number | undefined,
 })
 
 const pagination = reactive({
@@ -215,7 +205,7 @@ const pagination = reactive({
 const campusOptions = ref<string[]>([])
 const buildingOptions = ref<string[]>([])
 const typeOptions = ref<string[]>([])
-const statusOptions = ref<ClassroomStatus[]>(['AVAILABLE', 'MAINTENANCE', 'OCCUPIED'])
+const statusOptions = ref<ClassroomStatus[]>(['AVAILABLE', 'OCCUPIED', 'MAINTENANCE'])
 
 async function fetchClassrooms() {
   loading.value = true
@@ -228,15 +218,12 @@ async function fetchClassrooms() {
       building: filters.building,
       type: filters.type,
       status: filters.status,
-      minCapacity: filters.minCapacity,
     })
-    const body = response.data
-    if (!body.success) throw new Error('获取教室列表失败')
-    const page = body.data
-    tableData.value = page?.list ?? []
-    pagination.total = page?.total ?? 0
+    const data = checkResponse(response.data)
+    tableData.value = data.list ?? []
+    pagination.total = data.total ?? 0
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : '未知错误')
+    ElMessage.error(err instanceof Error ? err.message : '获取教室列表失败')
   } finally {
     loading.value = false
   }
@@ -245,10 +232,10 @@ async function fetchClassrooms() {
 async function fetchFilterOptions() {
   try {
     const response = await getOptionsApi()
-    const options = response.data.data
-    campusOptions.value = options?.campuses ?? []
-    buildingOptions.value = options?.buildings ?? []
-    typeOptions.value = options?.types ?? []
+    const options = checkResponse(response.data)
+    campusOptions.value = options.campuses ?? []
+    buildingOptions.value = options.buildings ?? []
+    typeOptions.value = options.types ?? []
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
   }
@@ -265,7 +252,6 @@ function handleReset() {
   filters.building = undefined
   filters.type = undefined
   filters.status = undefined
-  filters.minCapacity = undefined
   pagination.page = 1
   fetchClassrooms()
 }
@@ -296,10 +282,14 @@ function handleDelete(row: Classroom) {
     '删除确认',
     { type: 'warning' },
   )
-    .then(() => {
-      // TODO: 调用后端删除接口
-      ElMessage.success('删除成功（待实现）')
-      fetchClassrooms()
+    .then(async () => {
+      try {
+        await deleteApi(row.id)
+        ElMessage.success('删除成功')
+        fetchClassrooms()
+      } catch (err) {
+        ElMessage.error(err instanceof Error ? err.message : '删除失败')
+      }
     })
     .catch(() => {})
 }

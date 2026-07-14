@@ -42,6 +42,11 @@ import { ElMessage } from 'element-plus'
 import { EditPen, Loading } from '@element-plus/icons-vue'
 import ClassroomForm from './components/classroom-form.vue'
 import type { ClassroomFormData } from './components/classroom-form.vue'
+import {
+  getClassroomDetail as getDetailApi,
+  patchClassroom as patchApi,
+} from '@/api/classroom'
+import checkResponse from '@/utils/checkResponse'
 
 const route = useRoute()
 const router = useRouter()
@@ -58,17 +63,17 @@ async function fetchClassroomDetail() {
   if (!classroomId.value) return
   loading.value = true
   try {
-    // TODO: 调用后端获取教室详情接口
-    // const res = await getClassroomDetail(Number(classroomId.value))
-    // initialData.value = {
-    //   roomNo: res.data.data.roomNo,
-    //   capacity: res.data.data.capacity,
-    //   status: res.data.data.status,
-    //   type: res.data.data.type ?? undefined,
-    //   campus: res.data.data.campus ?? undefined,
-    //   building: res.data.data.building ?? undefined,
-    //   area: res.data.data.area ?? undefined,
-    // }
+    const response = await getDetailApi(Number(classroomId.value))
+    const data = checkResponse(response.data)
+    initialData.value = {
+      roomNo: data.roomNo,
+      capacity: data.capacity,
+      status: data.status,
+      type: data.type ?? undefined,
+      campus: data.campus ?? undefined,
+      building: data.building ?? undefined,
+      area: data.area ?? undefined,
+    }
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取教室信息失败')
   } finally {
@@ -87,13 +92,16 @@ async function handleSubmit() {
   submitting.value = true
   try {
     const data = classroomFormRef.value.getFormData()
-    // TODO: 调用后端修改教室接口
-    // await updateClassroom(Number(classroomId.value), {
-    //   ...data,
-    //   area: data.area || undefined,
-    // })
-    console.log('[modify-classroom] id:', classroomId.value, 'payload:', data)
-    ElMessage.success('修改成功（待实现）')
+    const response = await patchApi(Number(classroomId.value), {
+      capacity: data.capacity,
+      status: data.status,
+      type: data.type ?? null,
+      campus: data.campus ?? null,
+      building: data.building ?? null,
+      area: data.area ?? null,
+    })
+    checkResponse(response.data)
+    ElMessage.success('修改成功')
     router.back()
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '提交失败')

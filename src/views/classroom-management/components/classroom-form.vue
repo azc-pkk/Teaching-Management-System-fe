@@ -110,6 +110,7 @@ import {
   getClassroomFilterOptions as getOptionsApi,
   type ClassroomStatus,
 } from '@/api/classroom'
+import checkResponse from '@/utils/checkResponse'
 
 export interface ClassroomFormData {
   roomNo: string
@@ -181,10 +182,10 @@ const statusOptions = ref<ClassroomStatus[]>(['AVAILABLE', 'MAINTENANCE', 'OCCUP
 async function fetchOptions() {
   try {
     const response = await getOptionsApi()
-    const options = response.data.data
-    campusOptions.value = options?.campuses ?? []
-    buildingOptions.value = options?.buildings ?? []
-    typeOptions.value = options?.types ?? []
+    const options = checkResponse(response.data)
+    campusOptions.value = options.campuses ?? []
+    buildingOptions.value = options.buildings ?? []
+    typeOptions.value = options.types ?? []
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
   }

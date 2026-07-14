@@ -1,33 +1,21 @@
-import type { AxiosResponse } from 'axios'
+import axios from 'axios'
+import type { ApiResponse } from './types'
 
 export interface Classroom {
     area?: number | null;
-    building?: null | string;
-    campus?: null | string;
+    building?: string | null;
+    campus?: string | null;
     capacity: number;
     id: number;
     roomNo: string;
     status: ClassroomStatus;
-    type?: null | string;
-    [property: string]: any;
+    type?: string | null;
 }
 
 export type ClassroomStatus =
     | 'AVAILABLE'
-    | 'MAINTENANCE'
     | 'OCCUPIED'
-
-export interface ClassroomPageResponse {
-    success?: boolean;
-    data?: ClassroomPageData;
-}
-
-export interface ClassroomPageData {
-    list?: Classroom[];
-    total?: number;
-    page?: number;
-    pageSize?: number;
-}
+    | 'MAINTENANCE';
 
 export interface GetClassroomListRequest {
     page?: number;
@@ -37,60 +25,66 @@ export interface GetClassroomListRequest {
     building?: string;
     type?: string;
     status?: ClassroomStatus;
-    minCapacity?: number;
 }
 
-export interface ClassroomOptionsResponse {
-    success?: boolean;
-    data?: ClassroomOptions;
+export interface GetClassroomListResponse {
+    list?: Classroom[];
+    page?: number;
+    pageSize?: number;
+    total?: number;
 }
 
-export interface ClassroomOptions {
+export function getClassroomList(params: GetClassroomListRequest) {
+    return axios.get<ApiResponse<GetClassroomListResponse>>('/api/classrooms', { params });
+}
+
+export interface GetOptionsResponse {
     campuses?: string[];
     buildings?: string[];
     types?: string[];
+    statuses?: ClassroomStatus[];
 }
 
-export interface CreateClassroomRequest {
+export function getClassroomFilterOptions() {
+    return axios.get<ApiResponse<GetOptionsResponse>>('/api/classrooms/options');
+}
+
+export interface AddClassroomRequest {
     roomNo: string;
     capacity: number;
     status?: ClassroomStatus;
-    type?: string;
-    campus?: string;
-    building?: string;
-    area?: number;
+    type?: string | null;
+    campus?: string | null;
+    building?: string | null;
+    area?: number | null;
 }
 
-export interface UpdateClassroomRequest {
+export function addClassroom(params: AddClassroomRequest) {
+    return axios.post<ApiResponse<Classroom>>('/api/classrooms', params);
+}
+
+export function getClassroomDetail(id: number) {
+    return axios.get<ApiResponse<Classroom>>(`/api/classrooms/${id}`);
+}
+
+export interface PatchClassroomRequest {
     roomNo?: string;
     capacity?: number;
     status?: ClassroomStatus;
-    type?: string;
-    campus?: string;
-    building?: string;
-    area?: number;
+    type?: string | null;
+    campus?: string | null;
+    building?: string | null;
+    area?: number | null;
 }
 
-export function getClassroomList(_params: GetClassroomListRequest): Promise<AxiosResponse<ClassroomPageResponse>> {
-    // TODO: 调用后端接口
-    // return axios.get<ClassroomPageResponse>('/api/classrooms', { params })
-    return Promise.reject(new Error('getClassroomList 未实现'))
+export function patchClassroom(id: number, params: PatchClassroomRequest) {
+    return axios.patch<ApiResponse<Classroom>>(`/api/classrooms/${id}`, params);
 }
 
-export function getClassroomFilterOptions(): Promise<AxiosResponse<ClassroomOptionsResponse>> {
-    // TODO: 调用后端接口
-    // return axios.get<ClassroomOptionsResponse>('/api/classrooms/options')
-    return Promise.reject(new Error('getClassroomFilterOptions 未实现'))
+export interface DeleteClassroomResponse {
+    deleted: boolean;
 }
 
-export function createClassroom(_data: CreateClassroomRequest): Promise<AxiosResponse<{ success: boolean }>> {
-    // TODO: 调用后端接口
-    // return axios.post('/api/classrooms', data)
-    return Promise.reject(new Error('createClassroom 未实现'))
-}
-
-export function updateClassroom(_id: number, _data: UpdateClassroomRequest): Promise<AxiosResponse<{ success: boolean }>> {
-    // TODO: 调用后端接口
-    // return axios.put(`/api/classrooms/${id}`, data)
-    return Promise.reject(new Error('updateClassroom 未实现'))
+export function deleteClassroom(id: number) {
+    return axios.delete<ApiResponse<DeleteClassroomResponse>>(`/api/classrooms/${id}`);
 }
