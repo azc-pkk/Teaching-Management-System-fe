@@ -53,7 +53,7 @@
           v-for="c in classGroupOptions"
           :key="c.id"
           :label="c.name"
-          :value="c.id"
+          :value="c.id ?? 0"
         />
       </el-select>
     </el-form-item>
@@ -93,6 +93,7 @@ import {
   type ClassGroup,
   type StudentStatus,
 } from '@/api/student'
+import checkResponse from '@/utils/checkResponse'
 
 export interface StudentFormData {
   name: string
@@ -162,9 +163,9 @@ const statusOptions = ref<StudentStatus[]>(['ENROLLED', 'GRADUATED', 'SUSPENDED'
 async function fetchOptions() {
   try {
     const response = await getOptionsApi()
-    const options = response.data.data
-    classGroupOptions.value = options?.classGroups ?? []
-    gradeOptions.value = options?.grades ?? []
+    const options = checkResponse(response.data)
+    classGroupOptions.value = options.classGroups ?? []
+    gradeOptions.value = options.grades ?? []
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
   }

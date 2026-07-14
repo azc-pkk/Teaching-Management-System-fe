@@ -42,6 +42,11 @@ import { ElMessage } from 'element-plus'
 import { EditPen, Loading } from '@element-plus/icons-vue'
 import StudentForm from './components/student-form.vue'
 import type { StudentFormData } from './components/student-form.vue'
+import {
+  getStudentDetail as getDetailApi,
+  patchStudent as patchApi,
+} from '@/api/student'
+import checkResponse from '@/utils/checkResponse'
 
 const route = useRoute()
 const router = useRouter()
@@ -58,16 +63,16 @@ async function fetchStudentDetail() {
   if (!studentId.value) return
   loading.value = true
   try {
-    // TODO: 调用后端获取学生详情接口
-    // const res = await getStudentDetail(Number(studentId.value))
-    // initialData.value = {
-    //   name: res.data.data.name,
-    //   studentNo: res.data.data.studentNo,
-    //   grade: res.data.data.grade,
-    //   classGroupId: res.data.data.classGroupId,
-    //   status: res.data.data.status,
-    //   phone: res.data.data.phone ?? '',
-    // }
+    const response = await getDetailApi(Number(studentId.value))
+    const data = checkResponse(response.data)
+    initialData.value = {
+      name: data.name,
+      studentNo: data.studentNo,
+      grade: data.grade,
+      classGroupId: data.classGroupId,
+      status: data.status,
+      phone: data.phone ?? '',
+    }
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取学生信息失败')
   } finally {
@@ -86,13 +91,15 @@ async function handleSubmit() {
   submitting.value = true
   try {
     const data = studentFormRef.value.getFormData()
-    // TODO: 调用后端修改学生接口
-    // await updateStudent(Number(studentId.value), {
-    //   ...data,
-    //   phone: data.phone || undefined,
-    // })
-    console.log('[modify-student] id:', studentId.value, 'payload:', data)
-    ElMessage.success('修改成功（待实现）')
+    const response = await patchApi(Number(studentId.value), {
+      name: data.name,
+      grade: data.grade,
+      classGroupId: data.classGroupId,
+      status: data.status,
+      phone: data.phone || null,
+    })
+    checkResponse(response.data)
+    ElMessage.success('修改成功')
     router.back()
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '提交失败')

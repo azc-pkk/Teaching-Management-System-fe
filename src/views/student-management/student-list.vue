@@ -40,7 +40,7 @@
               v-for="c in classGroupOptions"
               :key="c.id"
               :label="c.name"
-              :value="c.id"
+              :value="c.id ?? 0"
             />
           </el-select>
         </el-form-item>
@@ -79,16 +79,10 @@
       <template #header>
         <div class="flex items-center justify-between">
           <span class="font-medium">学生列表</span>
-          <div class="flex gap-2">
-            <el-button type="primary" plain size="small" @click="handleImport">
-              <el-icon class="mr-1"><Upload /></el-icon>
-              批量导入
-            </el-button>
-            <el-button type="primary" plain size="small" @click="handleAdd">
-              <el-icon class="mr-1"><Plus /></el-icon>
-              新增学生
-            </el-button>
-          </div>
+          <el-button type="primary" plain size="small" @click="handleAdd">
+            <el-icon class="mr-1"><Plus /></el-icon>
+            新增学生
+          </el-button>
         </div>
       </template>
 
@@ -148,62 +142,21 @@
         />
       </div>
     </el-card>
-
-    <!-- 批量导入弹窗 -->
-    <el-dialog
-      v-model="importDialogVisible"
-      title="批量导入学生"
-      width="480px"
-    >
-      <el-upload
-        ref="uploadRef"
-        :auto-upload="false"
-        :limit="1"
-        :on-exceed="handleExceed"
-        :on-change="handleFileChange"
-        drag
-        accept=".xlsx,.xls,.csv"
-      >
-        <el-icon class="text-3xl text-gray-400 mb-2"><UploadFilled /></el-icon>
-        <div class="text-sm text-gray-600">
-          将文件拖到此处，或<em class="text-indigo-600">点击上传</em>
-        </div>
-        <template #tip>
-          <div class="text-xs text-gray-400 mt-2">
-            支持 .xlsx / .xls / .csv 格式，单次上传一个文件
-          </div>
-        </template>
-      </el-upload>
-
-      <template #footer>
-        <el-button @click="importDialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          :loading="importing"
-          :disabled="!pendingFile"
-          @click="handleImportSubmit"
-        >
-          开始导入
-        </el-button>
-      </template>
-    </el-dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import type { UploadInstance, UploadRawFile, UploadFile } from 'element-plus'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Search, Refresh, Plus, Upload, UploadFilled,
-} from '@element-plus/icons-vue'
+import { Search, Refresh, Plus } from '@element-plus/icons-vue'
 import {
   getStudentList as getListApi,
   getStudentFilterOptions as getOptionsApi,
-  importStudentsFromFile as importApi,
+  deleteStudent as deleteApi,
   type Student,
   type StudentStatus,
   type ClassGroup,
 } from '@/api/student'
+import checkResponse from '@/utils/checkResponse'
 import { useRouter } from 'vue-router'
 
 const statusLabel: Record<StudentStatus, string> = {
@@ -253,13 +206,11 @@ async function fetchStudents() {
       classGroupId: filters.classGroupId,
       status: filters.status,
     })
-    const body = response.data
-    if (!body.success) throw new Error('获取学生列表失败')
-    const page = body.data
-    tableData.value = page?.list ?? []
-    pagination.total = page?.total ?? 0
+    const data = checkResponse(response.data)
+    tableData.value = data.list ?? []
+    pagination.total = data.total ?? 0
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : '未知错误')
+    ElMessage.error(err instanceof Error ? err.message : '获取学生列表失败')
   } finally {
     loading.value = false
   }
@@ -268,9 +219,9 @@ async function fetchStudents() {
 async function fetchFilterOptions() {
   try {
     const response = await getOptionsApi()
-    const options = response.data.data
-    classGroupOptions.value = options?.classGroups ?? []
-    gradeOptions.value = options?.grades ?? []
+    const options = checkResponse(response.data)
+    classGroupOptions.value = options.classGroups ?? []
+    gradeOptions.value = options.grades ?? []
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
   }
@@ -316,54 +267,16 @@ function handleDelete(row: Student) {
     '删除确认',
     { type: 'warning' },
   )
-    .then(() => {
-      // TODO: 调用后端删除接口
-      ElMessage.success('删除成功（待实现）')
-      fetchStudents()
+    .then(async () => {
+      try {
+        await deleteApi(row.id)
+        ElMessage.success('删除成功')
+        fetchStudents()
+      } catch (err) {
+        ElMessage.error(err instanceof Error ? err.message : '删除失败')
+      }
     })
     .catch(() => {})
-}
-
-// ===== 批量导入 =====
-const importDialogVisible = ref(false)
-const importing = ref(false)
-const pendingFile = ref<File | null>(null)
-const uploadRef = shallowRef<UploadInstance>()
-
-function handleImport() {
-  pendingFile.value = null
-  importDialogVisible.value = true
-}
-
-function handleFileChange(file: UploadFile) {
-  if (file.raw) {
-    pendingFile.value = file.raw as unknown as File
-  }
-}
-
-function handleExceed(files: File[]) {
-  uploadRef.value?.clearFiles()
-  const file = files[0] as unknown as UploadRawFile
-  uploadRef.value?.handleStart(file)
-  pendingFile.value = files[0]
-}
-
-async function handleImportSubmit() {
-  if (!pendingFile.value) {
-    ElMessage.warning('请先选择文件')
-    return
-  }
-  importing.value = true
-  try {
-    await importApi(pendingFile.value)
-    ElMessage.success('导入成功（待实现）')
-    importDialogVisible.value = false
-    fetchStudents()
-  } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : '导入失败')
-  } finally {
-    importing.value = false
-  }
 }
 
 onMounted(() => {

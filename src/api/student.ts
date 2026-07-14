@@ -1,4 +1,5 @@
-import type { AxiosResponse } from 'axios'
+import axios from 'axios'
+import type { ApiResponse } from './types'
 
 export interface Student {
     classGroupId: number;
@@ -6,101 +7,104 @@ export interface Student {
     grade: number;
     id: number;
     name: string;
-    phone?: null | string;
+    phone?: string | null;
     status: StudentStatus;
     studentNo: string;
 }
 
 export type StudentStatus =
     | 'ENROLLED'
-    | 'GRADUATED'
     | 'SUSPENDED'
+    | 'GRADUATED'
     | 'WITHDRAWN';
-
-export interface ClassGroup {
-    id: number;
-    name: string;
-}
-
-export interface StudentPageResponse {
-    success?: boolean;
-    data?: StudentPageData;
-}
-
-export interface StudentPageData {
-    list?: Student[];
-    total?: number;
-    page?: number;
-    pageSize?: number;
-}
 
 export interface GetStudentListRequest {
     page?: number;
     pageSize?: number;
     keyword?: string;
-    grade?: number;
     classGroupId?: number;
+    grade?: number;
     status?: StudentStatus;
 }
 
-export interface StudentOptionsResponse {
-    success?: boolean;
-    data?: StudentOptions;
+export interface GetStudentListResponse {
+    list?: Student[];
+    page?: number;
+    pageSize?: number;
+    total?: number;
 }
 
-export interface StudentOptions {
+export function getStudentList(params: GetStudentListRequest) {
+    return axios.get<ApiResponse<GetStudentListResponse>>('/api/students', { params });
+}
+
+export interface Department {
+    id?: number;
+    name?: string;
+}
+
+export interface Major {
+    id?: number;
+    name?: string;
+    departmentId?: number;
+}
+
+export interface ClassGroup {
+    id?: number;
+    name?: string;
+    grade?: number;
+    majorId?: number;
+    majorName?: string;
+    departmentId?: number;
+    departmentName?: string;
+}
+
+export interface GetOptionsResponse {
+    departments?: Department[];
+    majors?: Major[];
     classGroups?: ClassGroup[];
     grades?: number[];
     statuses?: StudentStatus[];
 }
 
-export interface CreateStudentRequest {
-    name: string;
+export function getStudentFilterOptions() {
+    return axios.get<ApiResponse<GetOptionsResponse>>('/api/students/options');
+}
+
+export interface AddStudentRequest {
     studentNo: string;
-    grade: number;
+    name: string;
     classGroupId: number;
-    phone?: string;
-    status?: StudentStatus;
+    grade: number;
+    status: StudentStatus;
+    phone?: string | null;
 }
 
-export interface UpdateStudentRequest {
+export function addStudent(params: AddStudentRequest) {
+    return axios.post<ApiResponse<Student>>('/api/students', params);
+}
+
+export function getStudentDetail(id: number) {
+    return axios.get<ApiResponse<Student>>(`/api/students/${id}`);
+}
+
+export interface PatchStudentRequest {
+    studentNo?: string;
     name?: string;
-    grade?: number;
     classGroupId?: number;
-    phone?: string;
+    grade?: number;
     status?: StudentStatus;
+    phone?: string | null;
 }
 
-export function getStudentList(_params: GetStudentListRequest): Promise<AxiosResponse<StudentPageResponse>> {
-    // TODO: 调用后端接口
-    // return axios.get<StudentPageResponse>('/api/students', { params })
-    return Promise.reject(new Error('getStudentList 未实现'))
+export function patchStudent(id: number, params: PatchStudentRequest) {
+    return axios.patch<ApiResponse<Student>>(`/api/students/${id}`, params);
 }
 
-export function getStudentFilterOptions(): Promise<AxiosResponse<StudentOptionsResponse>> {
-    // TODO: 调用后端接口
-    // return axios.get<StudentOptionsResponse>('/api/students/options')
-    return Promise.reject(new Error('getStudentFilterOptions 未实现'))
+export interface DeleteStudentResponse {
+    deleted: boolean;
 }
 
-export function createStudent(_data: CreateStudentRequest): Promise<AxiosResponse<{ success: boolean }>> {
-    // TODO: 调用后端接口
-    // return axios.post('/api/students', data)
-    return Promise.reject(new Error('createStudent 未实现'))
-}
-
-export function updateStudent(_id: number, _data: UpdateStudentRequest): Promise<AxiosResponse<{ success: boolean }>> {
-    // TODO: 调用后端接口
-    // return axios.put(`/api/students/${id}`, data)
-    return Promise.reject(new Error('updateStudent 未实现'))
-}
-
-export function importStudentsFromFile(_file: File): Promise<AxiosResponse<{ success: boolean }>> {
-    // TODO: 调用后端批量导入接口
-    // const formData = new FormData()
-    // formData.append('file', file)
-    // return axios.post('/api/students/import', formData, {
-    //   headers: { 'Content-Type': 'multipart/form-data' },
-    // })
-    return Promise.reject(new Error('importStudentsFromFile 未实现'))
+export function deleteStudent(id: number) {
+    return axios.delete<ApiResponse<DeleteStudentResponse>>(`/api/students/${id}`);
 }
