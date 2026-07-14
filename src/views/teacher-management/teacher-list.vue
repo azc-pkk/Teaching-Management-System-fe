@@ -18,13 +18,13 @@
             v-model="filters.departmentId"
             placeholder="全部院系"
             clearable
-            class="w-40"
+            class="w-40!"
           >
             <el-option
               v-for="dept in departmentOptions"
               :key="dept.id"
               :label="dept.name"
-              :value="dept.id"
+              :value="dept.id ?? 0"
             />
           </el-select>
         </el-form-item>
@@ -34,7 +34,7 @@
             v-model="filters.teacherType"
             placeholder="全部类型"
             clearable
-            class="w-40"
+            class="w-40!"
           >
             <el-option
               v-for="t in teacherTypeOptions"
@@ -50,7 +50,7 @@
             v-model="filters.title"
             placeholder="全部职称"
             clearable
-            class="w-40"
+            class="w-40!"
           >
             <el-option
               v-for="t in titleOptions"
@@ -79,6 +79,10 @@
       <template #header>
         <div class="flex items-center justify-between">
           <span class="font-medium">教师列表</span>
+          <el-button type="primary" plain size="small" @click="handleAdd">
+            <el-icon class="mr-1"><Plus /></el-icon>
+            新增教师
+          </el-button>
         </div>
       </template>
 
@@ -136,8 +140,19 @@ import type { Teacher } from '@/api/teacher'
 import {
   Search,
   Refresh,
+  Plus,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  getTeacherList as getListApi,
+  getTeacherFilterOptions as getOptionsApi,
+  deleteTeacher as deleteApi,
+  type Department,
+} from '@/api/teacher'
+import checkResponse from '@/utils/checkResponse'
+import { useRouter } from 'vue-router'
+
+const router = useRouter();
 
 const loading = ref(false)
 const tableData = ref<Teacher[]>([])
@@ -155,80 +170,77 @@ const pagination = reactive({
   total: 0,
 })
 
-interface DepartmentOption {
-  id: number
-  name: string
-}
-
-const departmentOptions = ref<DepartmentOption[]>([])
+const departmentOptions = ref<Department[]>([])
 const teacherTypeOptions = ref<string[]>([])
 const titleOptions = ref<string[]>([])
 
 async function fetchTeachers() {
   loading.value = true
   try {
-    // TODO: 调用后端接口
-    // const params: TeacherQueryParams = {
-    //   keyword: filters.keyword,
-    //   departmentId: filters.departmentId,
-    //   teacherType: filters.teacherType,
-    //   title: filters.title,
-    //   page: pagination.page,
-    //   pageSize: pagination.pageSize,
-    // }
-    // const res = await teacherApi.query(params)
-    // tableData.value = res.data.data.list
-    // pagination.total = res.data.data.total
-  } catch (error) {
-    ElMessage.error('获取教师列表失败')
+    const response = await getListApi({
+      keyword: filters.keyword || undefined,
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      departmentId: filters.departmentId,
+      teacherType: filters.teacherType,
+      title: filters.title,
+    });
+    const data = checkResponse(response.data);
+    tableData.value = data.list ?? [];
+    pagination.total = data.total ?? 0;
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '获取教师列表失败');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-async function fetchDepartmentOptions() {
-  // TODO: 从后端获取院系列表
-  // departmentOptions.value = (await departmentApi.list()).data.data
-}
-
 async function fetchFilterOptions() {
-  // TODO: 从后端获取教师类型 / 职称的可选值
-  // const res = await teacherApi.getFilterOptions()
-  // teacherTypeOptions.value = res.data.data.teacherTypes
-  // titleOptions.value = res.data.data.titles
+  try {
+    const response = await getOptionsApi();
+    const options = checkResponse(response.data);
+    departmentOptions.value = options.departments ?? [];
+    teacherTypeOptions.value = options.teacherTypes ?? [];
+    titleOptions.value = options.titles ?? [];
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败');
+  }
 }
 
 function handleSearch() {
-  pagination.page = 1
-  fetchTeachers()
+  pagination.page = 1;
+  fetchTeachers();
 }
 
 function handleReset() {
-  filters.keyword = ''
-  filters.departmentId = undefined
-  filters.teacherType = undefined
-  filters.title = undefined
-  pagination.page = 1
-  fetchTeachers()
+  filters.keyword = '';
+  filters.departmentId = undefined;
+  filters.teacherType = undefined;
+  filters.title = undefined;
+  pagination.page = 1;
+  fetchTeachers();
 }
 
 function handlePageChange() {
-  fetchTeachers()
+  fetchTeachers();
 }
 
 function handleSizeChange() {
-  pagination.page = 1
-  fetchTeachers()
+  pagination.page = 1;
+  fetchTeachers();
 }
 
 function handleAdd() {
-  // TODO: 跳转新增页
-  ElMessage.info('新增教师（待实现）')
+  router.push({ name: 'teacher-management-add-teacher' })
 }
 
 function handleEdit(_row: Teacher) {
-  // TODO: 跳转编辑页
-  ElMessage.info(`编辑教师：${_row.name}（待实现）`)
+  router.push({
+    name: 'teacher-management-modify-teacher',
+    params: {
+      id: _row.id,
+    }
+  })
 }
 
 function handleDelete(row: Teacher) {
@@ -237,17 +249,20 @@ function handleDelete(row: Teacher) {
     '删除确认',
     { type: 'warning' },
   )
-    .then(() => {
-      // TODO: 调用后端删除接口
-      ElMessage.success('删除成功（待实现）')
-      fetchTeachers()
+    .then(async () => {
+      try {
+        await deleteApi(row.id);
+        ElMessage.success('删除成功')
+        fetchTeachers()
+      } catch (err) {
+        ElMessage.error(err instanceof Error ? err.message : '删除失败')
+      }
     })
     .catch(() => {})
 }
 
 onMounted(() => {
-  fetchDepartmentOptions()
-  fetchFilterOptions()
-  fetchTeachers()
+  fetchFilterOptions();
+  fetchTeachers();
 })
 </script>

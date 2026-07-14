@@ -1,8 +1,10 @@
 import type { Router } from 'vue-router';
 import usePermission from '@/hooks/permission';
+import NProgress from 'nprogress';
 
 export default function setupPermissionGuard(router: Router) {
     router.beforeEach((to, _from, next) => {
+        NProgress.start();
         const Permission = usePermission();
 
         const permissionAllow = Permission.hasPermission(to);
@@ -11,5 +13,6 @@ export default function setupPermissionGuard(router: Router) {
         else {
             next({ name: 'NotFound' })
         }
+        NProgress.done();
     });
 }

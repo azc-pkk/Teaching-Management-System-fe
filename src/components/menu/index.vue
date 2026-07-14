@@ -40,7 +40,7 @@
           :index="resolvePath(mod.path, '')"
         >
           <el-icon v-if="meta(mod)?.icon">
-            <component :is="(meta(mod) as AppRouteMeta)!.icon" />
+            <component :is="meta(mod)!.icon" />
           </el-icon>
           <span>{{ meta(mod)?.menuTitle }}</span>
         </el-menu-item>
@@ -49,7 +49,7 @@
         <el-sub-menu v-else :index="mod.path">
           <template #title>
             <el-icon v-if="meta(mod)?.icon">
-              <component :is="(meta(mod) as AppRouteMeta)!.icon" />
+              <component :is="meta(mod)!.icon" />
             </el-icon>
             <span>{{ meta(mod)?.menuTitle }}</span>
           </template>
@@ -59,7 +59,7 @@
             :index="resolvePath(mod.path, child.path)"
           >
             <el-icon v-if="childMeta(child)?.icon">
-              <component :is="(childMeta(child) as AppRouteMeta)!.icon" />
+              <component :is="childMeta(child)!.icon" />
             </el-icon>
             <span>{{ childMeta(child)?.menuTitle }}</span>
           </el-menu-item>
@@ -70,9 +70,17 @@
 </template>
 
 <script lang="ts" setup>
-import type { AppRouteRecordRaw, AppRouteMeta } from '@/router/routes/types'
+import type { Component } from 'vue'
+import type { RouteRecordNormalized, RouteRecordRaw } from 'vue-router'
 import { Fold, Expand } from '@element-plus/icons-vue'
 import { appRoutes } from '@/router/routes'
+
+interface MenuMeta {
+  menuTitle?: string
+  icon?: Component
+  hideInMenu?: boolean
+  order?: number
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -94,20 +102,24 @@ const openMenus = computed(() => {
 })
 
 const menuRoutes = computed(() =>
-  appRoutes.filter(
-    (r) => r.meta?.hideInMenu !== true && r.meta?.menuTitle,
-  ),
+  appRoutes
+    .filter((r) => r.meta?.hideInMenu !== true && r.meta?.menuTitle)
+    .sort((a, b) => {
+      const ao = (a.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      const bo = (b.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      return ao - bo
+    }),
 )
 
-function meta(r: AppRouteRecordRaw): AppRouteMeta | undefined {
-  return r.meta
+function meta(r: RouteRecordNormalized): MenuMeta | undefined {
+  return r.meta as MenuMeta | undefined
 }
 
-function childMeta(r: AppRouteRecordRaw): AppRouteMeta | undefined {
-  return r.meta
+function childMeta(r: RouteRecordRaw): MenuMeta | undefined {
+  return r.meta as MenuMeta | undefined
 }
 
-function isVisibleChild(child: AppRouteRecordRaw): boolean {
+function isVisibleChild(child: RouteRecordRaw): boolean {
   const m = child.meta
   if (!m) return false
   if (m.hideInMenu === true) return false
@@ -115,9 +127,15 @@ function isVisibleChild(child: AppRouteRecordRaw): boolean {
   return true
 }
 
-function getVisibleChildren(route: AppRouteRecordRaw): AppRouteRecordRaw[] {
+function getVisibleChildren(route: RouteRecordNormalized): RouteRecordRaw[] {
   if (!route.children) return []
-  return route.children.filter(isVisibleChild)
+  return route.children
+    .filter(isVisibleChild)
+    .sort((a, b) => {
+      const ao = (a.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      const bo = (b.meta as MenuMeta | undefined)?.order ?? Number.MAX_SAFE_INTEGER
+      return ao - bo
+    })
 }
 
 function resolvePath(parentPath: string, childPath: string): string {
