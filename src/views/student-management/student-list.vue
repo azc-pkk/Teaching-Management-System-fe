@@ -13,6 +13,39 @@
           />
         </el-form-item>
 
+        <el-form-item label="院系">
+          <el-select
+            v-model="filters.departmentId"
+            placeholder="全部院系"
+            clearable
+            class="w-40!"
+            @change="handleDepartmentChange"
+          >
+            <el-option
+              v-for="d in departmentOptions"
+              :key="d.id"
+              :label="d.name"
+              :value="d.id ?? 0"
+            />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="专业">
+          <el-select
+            v-model="filters.majorId"
+            placeholder="全部专业"
+            clearable
+            class="w-40!"
+          >
+            <el-option
+              v-for="m in filteredMajorOptions"
+              :key="m.id"
+              :label="m.name"
+              :value="m.id ?? 0"
+            />
+          </el-select>
+        </el-form-item>
+
         <el-form-item label="年级">
           <el-select
             v-model="filters.grade"
@@ -45,7 +78,7 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="状态">
+        <el-form-item label="学籍状态">
           <el-select
             v-model="filters.status"
             placeholder="全部状态"
@@ -58,6 +91,30 @@
               :label="statusLabel[s]"
               :value="s"
             />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="账号激活">
+          <el-select
+            v-model="filters.activated"
+            placeholder="全部"
+            clearable
+            class="w-32!"
+          >
+            <el-option label="已激活" :value="true" />
+            <el-option label="未激活" :value="false" />
+          </el-select>
+        </el-form-item>
+
+        <el-form-item label="账号启用">
+          <el-select
+            v-model="filters.enabled"
+            placeholder="全部"
+            clearable
+            class="w-32!"
+          >
+            <el-option label="已启用" :value="true" />
+            <el-option label="已禁用" :value="false" />
           </el-select>
         </el-form-item>
 
@@ -94,17 +151,33 @@
         class="w-full"
       >
         <el-table-column prop="name" label="姓名" min-width="100" fixed="left" />
-        <el-table-column prop="studentNo" label="学号" min-width="120" />
+        <el-table-column prop="studentNo" label="学号" min-width="140" />
+        <el-table-column prop="departmentName" label="院系" min-width="120" />
+        <el-table-column prop="majorName" label="专业" min-width="120" />
         <el-table-column prop="grade" label="年级" min-width="90">
           <template #default="{ row }">
             {{ row.grade }} 级
           </template>
         </el-table-column>
         <el-table-column prop="classGroupName" label="班级" min-width="150" />
-        <el-table-column prop="status" label="状态" min-width="100">
+        <el-table-column prop="status" label="学籍状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="statusTagType[row.status as StudentStatus]" size="small">
               {{ statusLabel[row.status as StudentStatus] }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="activated" label="账号激活" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.activated ? 'success' : 'info'" size="small">
+              {{ row.activated ? '已激活' : '未激活' }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column prop="enabled" label="账号状态" min-width="100">
+          <template #default="{ row }">
+            <el-tag :type="row.enabled ? 'success' : 'danger'" size="small">
+              {{ row.enabled ? '启用' : '禁用' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -155,6 +228,8 @@ import {
   type Student,
   type StudentStatus,
   type ClassGroup,
+  type Department,
+  type Major,
 } from '@/api/student'
 import checkResponse from '@/utils/checkResponse'
 import { useRouter } from 'vue-router'
@@ -180,9 +255,13 @@ const tableData = ref<Student[]>([])
 
 const filters = reactive({
   keyword: '',
+  departmentId: undefined as number | undefined,
+  majorId: undefined as number | undefined,
   grade: undefined as number | undefined,
   classGroupId: undefined as number | undefined,
   status: undefined as StudentStatus | undefined,
+  activated: undefined as boolean | undefined,
+  enabled: undefined as boolean | undefined,
 })
 
 const pagination = reactive({
@@ -191,9 +270,20 @@ const pagination = reactive({
   total: 0,
 })
 
+const departmentOptions = ref<Department[]>([])
+const majorOptions = ref<Major[]>([])
 const classGroupOptions = ref<ClassGroup[]>([])
 const gradeOptions = ref<number[]>([])
 const statusOptions = ref<StudentStatus[]>(['ENROLLED', 'GRADUATED', 'SUSPENDED', 'WITHDRAWN'])
+
+const filteredMajorOptions = computed(() => {
+  if (!filters.departmentId) return majorOptions.value
+  return majorOptions.value.filter((m) => m.departmentId === filters.departmentId)
+})
+
+function handleDepartmentChange() {
+  filters.majorId = undefined
+}
 
 async function fetchStudents() {
   loading.value = true
@@ -202,9 +292,13 @@ async function fetchStudents() {
       keyword: filters.keyword || undefined,
       page: pagination.page,
       pageSize: pagination.pageSize,
+      departmentId: filters.departmentId,
+      majorId: filters.majorId,
       grade: filters.grade,
       classGroupId: filters.classGroupId,
       status: filters.status,
+      activated: filters.activated,
+      enabled: filters.enabled,
     })
     const data = checkResponse(response.data)
     tableData.value = data.list ?? []
@@ -220,6 +314,8 @@ async function fetchFilterOptions() {
   try {
     const response = await getOptionsApi()
     const options = checkResponse(response.data)
+    departmentOptions.value = options.departments ?? []
+    majorOptions.value = options.majors ?? []
     classGroupOptions.value = options.classGroups ?? []
     gradeOptions.value = options.grades ?? []
   } catch (err) {
@@ -234,9 +330,13 @@ function handleSearch() {
 
 function handleReset() {
   filters.keyword = ''
+  filters.departmentId = undefined
+  filters.majorId = undefined
   filters.grade = undefined
   filters.classGroupId = undefined
   filters.status = undefined
+  filters.activated = undefined
+  filters.enabled = undefined
   pagination.page = 1
   fetchStudents()
 }
