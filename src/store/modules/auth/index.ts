@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import type { AuthState } from './types'
 import { login as loginApi } from '@/api/auth'
+import checkResponse from '@/utils/checkResponse';
 
 const useAuthStore = defineStore('auth', {
     state: (): AuthState => ({
@@ -23,29 +24,14 @@ const useAuthStore = defineStore('auth', {
         async login(username: string, password: string) {
             try {
                 const response = await loginApi({ username, password });
-
-                // TODO: Fail
-                console.log(
-                    '%c[auth] login response',
-                    'color: #16a34a; font-weight: bold',
-                )
-                console.log('  raw response:', response.data)
-                console.log('  user:', response.data.data.user)
-                console.log('  token:', response.data.data.token)
+                const innerRes = response.data;
+                const data = checkResponse(innerRes);
 
                 this.$patch((state) => {
-                    state.userId = response.data.data.user.id;
-                    state.role = response.data.data.user.role;
-                    state.accessToken = response.data.data.token;
+                    state.userId = data.user.id;
+                    state.role = data.user.role;
+                    state.accessToken = data.token;
                 })
-
-                console.log(
-                    '%c[auth] state after patch',
-                    'color: #2563eb; font-weight: bold',
-                    'userId =', this.userId,
-                    ', role =', this.role,
-                    ', isLogin =', this.isLogin,
-                )
             } catch (error) {
                 this.resetAuth();
                 throw error;
