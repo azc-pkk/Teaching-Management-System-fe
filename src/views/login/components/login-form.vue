@@ -53,7 +53,7 @@
 
     <footer class="mt-28px text-center text-14px c-[--text]">
       <span>还没有账号？</span>
-      <el-link type="primary" :underline="false">联系管理员注册</el-link>
+      <el-link type="primary" :underline="false" @click="router.push({ name: 'register' })">学生注册</el-link>
     </footer>
   </div>
 </template>

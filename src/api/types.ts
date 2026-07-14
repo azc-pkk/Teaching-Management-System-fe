@@ -9,3 +9,11 @@ export interface ErrType {
     message: string,
     details?: string[], // FIXME: -> string | null
 }
+
+export type WorkflowStatus =
+    | 'DRAFT'
+    | 'PENDING'
+    | 'APPROVED'
+    | 'REJECTED'
+    | 'CANCELLED'
+    | 'COMPLETED';
