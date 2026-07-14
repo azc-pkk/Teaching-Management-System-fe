@@ -28,6 +28,8 @@
 import { ElMessage } from 'element-plus'
 import { UserFilled } from '@element-plus/icons-vue'
 import TeacherForm from './components/teacher-form.vue'
+import { addTeacher as addApi } from '@/api/teacher'
+import checkResponse from '@/utils/checkResponse'
 
 const router = useRouter()
 const teacherFormRef = shallowRef<InstanceType<typeof TeacherForm>>()
@@ -44,13 +46,16 @@ async function handleSubmit() {
   submitting.value = true
   try {
     const data = teacherFormRef.value.getFormData()
-    // TODO: 调用后端新增教师接口
-    // await createTeacher({
-    //   ...data,
-    //   phone: data.phone || undefined,
-    // })
-    console.log('[add-teacher] payload:', data)
-    ElMessage.success('新增教师成功（待实现）')
+    const response = await addApi({
+      name: data.name,
+      employeeNo: data.employeeNo,
+      departmentId: data.departmentId ?? null,
+      teacherType: data.teacherType ?? null,
+      title: data.title ?? null,
+      phone: data.phone || null,
+    })
+    checkResponse(response.data)
+    ElMessage.success('新增教师成功')
     router.back()
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '提交失败')

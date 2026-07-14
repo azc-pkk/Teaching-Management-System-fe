@@ -79,6 +79,10 @@
       <template #header>
         <div class="flex items-center justify-between">
           <span class="font-medium">教师列表</span>
+          <el-button type="primary" plain size="small" @click="handleAdd">
+            <el-icon class="mr-1"><Plus /></el-icon>
+            新增教师
+          </el-button>
         </div>
       </template>
 
@@ -136,10 +140,16 @@ import type { Teacher } from '@/api/teacher'
 import {
   Search,
   Refresh,
+  Plus,
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getTeacherList as getListApi, getTeacherFilterOptions as getOptionsApi } from '@/api/teacher'
-import type { Department } from '@/api/teacher'
+import {
+  getTeacherList as getListApi,
+  getTeacherFilterOptions as getOptionsApi,
+  deleteTeacher as deleteApi,
+  type Department,
+} from '@/api/teacher'
+import checkResponse from '@/utils/checkResponse'
 import { useRouter } from 'vue-router'
 
 const router = useRouter();
@@ -175,26 +185,26 @@ async function fetchTeachers() {
       teacherType: filters.teacherType,
       title: filters.title,
     });
-
-    if (!response.data.success) throw new Error('获取教师列表失败');
-
-    const page = response.data.data;
-    tableData.value = page?.list ?? [];
-    pagination.total = page?.total ?? 0;
-
+    const data = checkResponse(response.data);
+    tableData.value = data.list ?? [];
+    pagination.total = data.total ?? 0;
   } catch (err) {
-    ElMessage.error(err instanceof Error ? err.message : '未知错误');
+    ElMessage.error(err instanceof Error ? err.message : '获取教师列表失败');
   } finally {
     loading.value = false;
   }
 }
 
 async function fetchFilterOptions() {
-  const response = await getOptionsApi();
-  const options = response.data.data;
-  departmentOptions.value = options?.departments ?? [];
-  teacherTypeOptions.value = options?.teacherTypes ?? [];
-  titleOptions.value = options?.titles ?? [];
+  try {
+    const response = await getOptionsApi();
+    const options = checkResponse(response.data);
+    departmentOptions.value = options.departments ?? [];
+    teacherTypeOptions.value = options.teacherTypes ?? [];
+    titleOptions.value = options.titles ?? [];
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败');
+  }
 }
 
 function handleSearch() {
@@ -220,6 +230,10 @@ function handleSizeChange() {
   fetchTeachers();
 }
 
+function handleAdd() {
+  router.push({ name: 'teacher-management-add-teacher' })
+}
+
 function handleEdit(_row: Teacher) {
   router.push({
     name: 'teacher-management-modify-teacher',
@@ -235,10 +249,14 @@ function handleDelete(row: Teacher) {
     '删除确认',
     { type: 'warning' },
   )
-    .then(() => {
-      // TODO: 调用后端删除接口
-      ElMessage.success('删除成功（待实现）')
-      fetchTeachers()
+    .then(async () => {
+      try {
+        await deleteApi(row.id);
+        ElMessage.success('删除成功')
+        fetchTeachers()
+      } catch (err) {
+        ElMessage.error(err instanceof Error ? err.message : '删除失败')
+      }
     })
     .catch(() => {})
 }

@@ -92,6 +92,7 @@ import {
   getTeacherFilterOptions as getOptionsApi,
   type Department,
 } from '@/api/teacher'
+import checkResponse from '@/utils/checkResponse'
 
 export interface TeacherFormData {
   name: string
@@ -154,10 +155,10 @@ const titleOptions = ref<string[]>([])
 async function fetchOptions() {
   try {
     const response = await getOptionsApi()
-    const options = response.data.data
-    departmentOptions.value = options?.departments ?? []
-    teacherTypeOptions.value = options?.teacherTypes ?? []
-    titleOptions.value = options?.titles ?? []
+    const options = checkResponse(response.data)
+    departmentOptions.value = options.departments ?? []
+    teacherTypeOptions.value = options.teacherTypes ?? []
+    titleOptions.value = options.titles ?? []
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
   }
