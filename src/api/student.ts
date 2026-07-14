@@ -1,15 +1,28 @@
 import axios from 'axios'
 import type { ApiResponse } from './types'
 
+export interface StudentUser {
+    id: number;
+    username: string;
+    enabled: boolean;
+}
+
 export interface Student {
     classGroupId: number;
     classGroupName?: string;
+    departmentId?: number;
+    departmentName?: string;
+    majorId?: number;
+    majorName?: string;
     grade: number;
     id: number;
     name: string;
     phone?: string | null;
     status: StudentStatus;
     studentNo: string;
+    activated?: boolean;
+    enabled?: boolean;
+    user?: StudentUser | null;
 }
 
 export type StudentStatus =
@@ -25,6 +38,10 @@ export interface GetStudentListRequest {
     classGroupId?: number;
     grade?: number;
     status?: StudentStatus;
+    departmentId?: number;
+    majorId?: number;
+    activated?: boolean;
+    enabled?: boolean;
 }
 
 export interface GetStudentListResponse {
