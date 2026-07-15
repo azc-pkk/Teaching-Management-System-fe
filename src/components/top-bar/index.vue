@@ -57,7 +57,7 @@
             <el-icon :size="15"><Setting /></el-icon>
             <span class="text-sm">个人设置</span>
           </li>
-          <li class="flex items-center gap-2 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100">
+          <li class="flex items-center gap-2 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100 cursor-pointer" @click="handleLogout">
             <el-icon :size="15"><SwitchButton /></el-icon>
             <span class="text-sm">退出登录</span>
           </li>
@@ -74,12 +74,25 @@ import {
   User,
   Setting,
   SwitchButton,
-  HomeFilled,
   Message,
 } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { useAuthStore } from '@/store'
+
+const authStore = useAuthStore()
+const router = useRouter()
 
 const navItems = [
-  { name: '主页', icon: HomeFilled },
   { name: '邮件', icon: Message },
 ] satisfies { name: string; icon: any }[]
+
+function handleLogout() {
+  ElMessageBox.confirm('确定要退出登录吗？', '退出确认', { type: 'warning' })
+    .then(() => {
+      authStore.resetAuth()
+      ElMessage.success('已退出登录')
+      router.push({ name: 'login' })
+    })
+    .catch(() => {})
+}
 </script>
