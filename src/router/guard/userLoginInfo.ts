@@ -1,12 +1,9 @@
 import type { LocationQueryRaw, Router } from 'vue-router';
 import useAuthStore from '@/store/modules/auth';
-import NProgress from 'nprogress';
 
 export default function setupUserLoginInfoGuard(router: Router) {
     router.beforeEach((to, _from, next) => {
-        NProgress.start();
         const authStore = useAuthStore();
-        // next();
         if (authStore.isLogin) {
             next();
         } else {
@@ -22,6 +19,5 @@ export default function setupUserLoginInfoGuard(router: Router) {
                 });
             }
         }
-        NProgress.done();
     });
 }
