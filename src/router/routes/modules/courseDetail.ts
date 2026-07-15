@@ -10,7 +10,7 @@ const COURSE_DETAIL_ROUTE: AppRouteRecordRaw = {
         title: 'Course Detail',
         menuTitle: '课程详情',
         icon: Reading,
-        roles: ['admin'],
+        roles: ['admin', 'student'],
         order: 70,
     },
     children: [
@@ -24,7 +24,7 @@ const COURSE_DETAIL_ROUTE: AppRouteRecordRaw = {
                 menuTitle: '课程详情查询',
                 icon: Reading,
                 hideInMenu: false,
-                roles: ['admin'],
+                roles: ['admin', 'student'],
                 order: 0,
             },
         },

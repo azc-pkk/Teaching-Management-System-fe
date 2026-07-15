@@ -3,25 +3,37 @@
     <!-- 搜索栏 -->
     <el-card class="mb-4" shadow="never">
       <el-form :model="searchForm" inline>
-        <el-form-item label="课程 ID">
-          <el-input
+        <el-form-item label="课程">
+          <el-select
             v-model="searchForm.courseId"
-            placeholder="请输入课程 ID"
+            placeholder="请选择课程"
+            filterable
             clearable
-            type="number"
-            class="w-50"
-            @keyup.enter="handleSearch"
-          />
+            class="w-72!"
+          >
+            <el-option
+              v-for="c in courseOptions"
+              :key="c.id"
+              :label="c.label"
+              :value="c.value"
+            />
+          </el-select>
         </el-form-item>
 
-        <el-form-item label="学期 ID">
-          <el-input
+        <el-form-item label="学期">
+          <el-select
             v-model="searchForm.semesterId"
-            placeholder="选填，如 202601"
+            placeholder="选填，筛选考试与教材"
             clearable
-            type="number"
-            class="w-40"
-          />
+            class="w-56!"
+          >
+            <el-option
+              v-for="s in semesterOptions"
+              :key="s.id"
+              :label="s.label"
+              :value="s.value"
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item>
@@ -228,6 +240,8 @@ import {
   type TextbookOrderStatus,
   type TeachingLogStatus,
 } from '@/api/courseDetail'
+import { getCourseOptions, getSemesterOptions } from '@/api/baseDataOptions'
+import type { CourseOption, SemesterOption } from '@/api/baseDataOptions'
 import type { WorkflowStatus } from '@/api/types'
 import checkResponse from '@/utils/checkResponse'
 
@@ -240,6 +254,26 @@ const searchForm = reactive({
   courseId: (route.query.courseId as string) || '',
   semesterId: (route.query.semesterId as string) || '',
 })
+
+const courseOptions = ref<CourseOption[]>([])
+const semesterOptions = ref<SemesterOption[]>([])
+
+async function fetchOptions() {
+  try {
+    const [courseRes, semesterRes] = await Promise.all([
+      getCourseOptions(),
+      getSemesterOptions(),
+    ])
+    if (courseRes.data.success && courseRes.data.data) {
+      courseOptions.value = courseRes.data.data
+    }
+    if (semesterRes.data.success && semesterRes.data.data) {
+      semesterOptions.value = semesterRes.data.data
+    }
+  } catch (err) {
+    ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
+  }
+}
 
 const workflowStatusLabel: Record<WorkflowStatus, string> = {
   DRAFT: '草稿',
@@ -315,13 +349,14 @@ async function fetchDetail(courseId: number, semesterId?: number) {
 function handleSearch() {
   const id = Number(searchForm.courseId)
   if (!id || id < 1) {
-    ElMessage.warning('请输入有效的课程 ID')
+    ElMessage.warning('请选择课程')
     return
   }
   fetchDetail(id, searchForm.semesterId ? Number(searchForm.semesterId) : undefined)
 }
 
 onMounted(() => {
+  fetchOptions()
   if (searchForm.courseId) {
     handleSearch()
   }

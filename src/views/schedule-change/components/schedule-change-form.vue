@@ -26,13 +26,20 @@
     </el-form-item>
 
     <el-form-item label="课程" prop="courseId">
-      <el-input
+      <el-select
         v-model="formModel.courseId"
-        placeholder="请输入课程 ID"
+        placeholder="请选择课程"
+        filterable
         clearable
-        type="number"
         class="w-72!"
-      />
+      >
+        <el-option
+          v-for="c in courseOptions"
+          :key="c.id"
+          :label="c.label"
+          :value="c.value"
+        />
+      </el-select>
     </el-form-item>
 
     <el-form-item label="班级" prop="classGroupId">
@@ -84,6 +91,8 @@ import { getTeacherList } from '@/api/teacher'
 import type { Teacher } from '@/api/teacher'
 import { getStudentFilterOptions } from '@/api/student'
 import type { ClassGroup } from '@/api/student'
+import { getCourseOptions } from '@/api/baseDataOptions'
+import type { CourseOption } from '@/api/baseDataOptions'
 
 export interface ScheduleChangeFormData {
     teacherId: number | undefined
@@ -136,18 +145,23 @@ const rules: FormRules<ScheduleChangeFormData> = {
 
 const teacherOptions = ref<Teacher[]>([])
 const classGroupOptions = ref<ClassGroup[]>([])
+const courseOptions = ref<CourseOption[]>([])
 
 async function fetchOptions() {
   try {
-    const [teacherRes, optionsRes] = await Promise.all([
+    const [teacherRes, optionsRes, courseRes] = await Promise.all([
       getTeacherList({ page: 1, pageSize: 100 }),
       getStudentFilterOptions(),
+      getCourseOptions(),
     ])
     if (teacherRes.data.success && teacherRes.data.data) {
       teacherOptions.value = teacherRes.data.data.list ?? []
     }
     if (optionsRes.data.success && optionsRes.data.data) {
       classGroupOptions.value = optionsRes.data.data.classGroups ?? []
+    }
+    if (courseRes.data.success && courseRes.data.data) {
+      courseOptions.value = courseRes.data.data
     }
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')

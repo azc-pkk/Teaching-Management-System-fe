@@ -8,24 +8,38 @@
     size="default"
   >
     <el-form-item label="学期" prop="semesterId">
-      <el-input
-        v-model.number="formModel.semesterId"
-        placeholder="请输入学期 ID（如 202601）"
+      <el-select
+        v-model="formModel.semesterId"
+        placeholder="请选择学期"
+        filterable
         clearable
-        type="number"
         :disabled="disabledFields.includes('semesterId')"
         class="w-72!"
-      />
+      >
+        <el-option
+          v-for="s in semesterOptions"
+          :key="s.id"
+          :label="s.label"
+          :value="s.value"
+        />
+      </el-select>
     </el-form-item>
 
     <el-form-item label="课程" prop="courseId">
-      <el-input
-        v-model.number="formModel.courseId"
-        placeholder="请输入课程 ID"
+      <el-select
+        v-model="formModel.courseId"
+        placeholder="请选择课程"
+        filterable
         clearable
-        type="number"
         class="w-72!"
-      />
+      >
+        <el-option
+          v-for="c in courseOptions"
+          :key="c.id"
+          :label="c.label"
+          :value="c.value"
+        />
+      </el-select>
     </el-form-item>
 
     <el-form-item label="班级" prop="classGroupId">
@@ -112,6 +126,8 @@ import { getTeacherList } from '@/api/teacher'
 import type { Teacher } from '@/api/teacher'
 import { getStudentFilterOptions } from '@/api/student'
 import type { ClassGroup } from '@/api/student'
+import { getSemesterOptions, getCourseOptions } from '@/api/baseDataOptions'
+import type { SemesterOption, CourseOption } from '@/api/baseDataOptions'
 
 export interface ExamFormData {
     semesterId: number | undefined
@@ -170,13 +186,17 @@ const rules: FormRules<ExamFormData> = {
 const classroomOptions = ref<Classroom[]>([])
 const teacherOptions = ref<Teacher[]>([])
 const classGroupOptions = ref<ClassGroup[]>([])
+const semesterOptions = ref<SemesterOption[]>([])
+const courseOptions = ref<CourseOption[]>([])
 
 async function fetchOptions() {
   try {
-    const [classroomRes, teacherRes, optionsRes] = await Promise.all([
+    const [classroomRes, teacherRes, optionsRes, semesterRes, courseRes] = await Promise.all([
       getClassroomList({ page: 1, pageSize: 100 }),
       getTeacherList({ page: 1, pageSize: 100 }),
       getStudentFilterOptions(),
+      getSemesterOptions(),
+      getCourseOptions(),
     ])
     if (classroomRes.data.success && classroomRes.data.data) {
       classroomOptions.value = classroomRes.data.data.list ?? []
@@ -186,6 +206,12 @@ async function fetchOptions() {
     }
     if (optionsRes.data.success && optionsRes.data.data) {
       classGroupOptions.value = optionsRes.data.data.classGroups ?? []
+    }
+    if (semesterRes.data.success && semesterRes.data.data) {
+      semesterOptions.value = semesterRes.data.data
+    }
+    if (courseRes.data.success && courseRes.data.data) {
+      courseOptions.value = courseRes.data.data
     }
   } catch (err) {
     ElMessage.error(err instanceof Error ? err.message : '获取选项数据失败')
