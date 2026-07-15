@@ -11,7 +11,7 @@ export default function setupPermissionGuard(router: Router) {
         console.log("Permission guard triggered.")
         if (permissionAllow) next();
         else {
-            next({ name: 'NotFound' })
+            next({ name: 'Forbidden' })
         }
         NProgress.done();
     });

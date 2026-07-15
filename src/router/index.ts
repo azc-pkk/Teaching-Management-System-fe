@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import { appRoutes } from './routes'
-import { NOT_FOUND_ROUTE } from './routes/base'
+import { NOT_FOUND_ROUTE, FORBIDDEN_ROUTE } from './routes/base'
 import createRouterGuard from './guard'
 
 const router = createRouter({
@@ -9,7 +9,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/login',
+      redirect: '/dashboard',
     },
     {
       path: '/login',
@@ -28,6 +28,7 @@ const router = createRouter({
       }
     },
     ...appRoutes as RouteRecordRaw[],
+    FORBIDDEN_ROUTE,
     NOT_FOUND_ROUTE,
   ] as RouteRecordRaw[],
 })

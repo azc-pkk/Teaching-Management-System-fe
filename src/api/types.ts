@@ -7,7 +7,7 @@ export interface ApiResponse<T = any> {
 export interface ErrType {
     code: string,
     message: string,
-    details?: string[], // FIXME: -> string | null
+    details?: string[],
 }
 
 export type WorkflowStatus =

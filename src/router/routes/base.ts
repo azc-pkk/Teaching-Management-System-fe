@@ -5,3 +5,12 @@ export const NOT_FOUND_ROUTE: RouteRecordRaw = {
     name: 'NotFound',
     component: () => import('@/views/not-found/index.vue'),
 }
+
+export const FORBIDDEN_ROUTE: RouteRecordRaw = {
+    path: '/forbidden',
+    name: 'Forbidden',
+    component: () => import('@/views/forbidden/index.vue'),
+    meta: {
+        requiresAuth: false,
+    },
+}
