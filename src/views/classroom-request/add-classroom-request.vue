@@ -48,6 +48,7 @@ async function handleSubmit() {
       startTime: data.startTime,
       endTime: data.endTime,
       purpose: data.purpose,
+      status: 'PENDING', // FIXME: 草稿有什么用？
     })
     checkResponse(response.data)
     ElMessage.success('提交申请成功')
