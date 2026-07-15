@@ -2,7 +2,7 @@ import type { InternalAxiosRequestConfig } from 'axios'
 import axios from 'axios'
 import { useAuthStore } from '@/store'
 
-if (import.meta.env.VITE_API_BASE_URL) {
+if (import.meta.env.PROD) {
     axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL
 }
 
