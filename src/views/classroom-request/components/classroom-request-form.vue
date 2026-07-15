@@ -25,6 +25,15 @@
       </el-select>
     </el-form-item>
 
+    <el-form-item label="参与人数" prop="participantCount">
+      <el-input-number
+        v-model="formModel.participantCount"
+        :min="1"
+        controls-position="right"
+        class="w-72!"
+      />
+    </el-form-item>
+
     <el-form-item label="开始时间" prop="startTime">
       <el-date-picker
         v-model="formModel.startTime"
@@ -69,6 +78,7 @@ import type { Classroom } from '@/api/classroom'
 
 export interface ClassroomRequestFormData {
     classroomId: number | undefined
+    participantCount: number
     startTime: string
     endTime: string
     purpose: string
@@ -89,6 +99,7 @@ const formRef = shallowRef<FormInstance>()
 
 const formModel = reactive<ClassroomRequestFormData>({
   classroomId: undefined,
+  participantCount: 1,
   startTime: '',
   endTime: '',
   purpose: '',
@@ -97,6 +108,10 @@ const formModel = reactive<ClassroomRequestFormData>({
 const rules: FormRules<ClassroomRequestFormData> = {
   classroomId: [
     { required: true, message: '请选择教室', trigger: 'change' },
+  ],
+  participantCount: [
+    { required: true, message: '请输入参与人数', trigger: 'blur' },
+    { type: 'number', min: 1, message: '参与人数至少为 1', trigger: 'blur' },
   ],
   startTime: [
     { required: true, message: '请选择开始时间', trigger: 'change' },
@@ -125,6 +140,7 @@ async function fetchClassroomOptions() {
 
 function fillForm(data: Partial<ClassroomRequestFormData>) {
   if (data.classroomId !== undefined) formModel.classroomId = data.classroomId
+  if (data.participantCount !== undefined) formModel.participantCount = data.participantCount
   if (data.startTime !== undefined) formModel.startTime = data.startTime
   if (data.endTime !== undefined) formModel.endTime = data.endTime
   if (data.purpose !== undefined) formModel.purpose = data.purpose

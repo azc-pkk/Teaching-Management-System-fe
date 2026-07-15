@@ -1,6 +1,21 @@
 import axios from 'axios'
 import type { ApiResponse, WorkflowStatus } from './types'
 
+export type ApprovalAction = 'SUBMIT' | 'APPROVE' | 'REJECT' | 'RETURN' | 'CANCEL';
+
+export interface ApprovalTimelineItem {
+    id: number;
+    action: ApprovalAction;
+    comment?: string | null;
+    operator: {
+        id: number;
+        username: string;
+        name: string;
+        role: string;
+    };
+    createdAt: string;
+}
+
 export interface ClassroomRequest {
     id: number;
     applicantId: number;
@@ -12,11 +27,17 @@ export interface ClassroomRequest {
     classroomBuilding?: string | null;
     classroomType?: string | null;
     classroomCapacity: number;
+    classroomStatus?: ClassroomStatus;
+    participantCount: number;
     startTime: string;
     endTime: string;
     purpose: string;
     status: WorkflowStatus;
+    latestApproval?: ApprovalTimelineItem | null;
+    approvalHistory?: ApprovalTimelineItem[];
 }
+
+export type ClassroomStatus = 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE';
 
 export interface GetClassroomRequestListRequest {
     page?: number;
@@ -41,12 +62,12 @@ export function getClassroomRequestList(params: GetClassroomRequestListRequest) 
 }
 
 export interface AddClassroomRequestRequest {
-    applicantId: number;
     classroomId: number;
+    participantCount: number;
     startTime: string;
     endTime: string;
     purpose: string;
-    status?: WorkflowStatus;
+    status?: 'DRAFT' | 'PENDING';
 }
 
 export function addClassroomRequest(params: AddClassroomRequestRequest) {
@@ -58,12 +79,12 @@ export function getClassroomRequestDetail(id: number) {
 }
 
 export interface PatchClassroomRequestRequest {
-    applicantId?: number;
     classroomId?: number;
+    participantCount?: number;
     startTime?: string;
     endTime?: string;
     purpose?: string;
-    status?: WorkflowStatus;
+    status?: 'DRAFT' | 'PENDING';
 }
 
 export function patchClassroomRequest(id: number, params: PatchClassroomRequestRequest) {

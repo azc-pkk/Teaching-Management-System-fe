@@ -25,11 +25,9 @@ import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import ClassroomRequestForm from './components/classroom-request-form.vue'
 import { addClassroomRequest as addApi } from '@/api/classroomRequest'
-import { useAuthStore } from '@/store'
 import checkResponse from '@/utils/checkResponse'
 
 const router = useRouter()
-const authStore = useAuthStore()
 const formRef = shallowRef<InstanceType<typeof ClassroomRequestForm>>()
 const submitting = ref(false)
 
@@ -45,8 +43,8 @@ async function handleSubmit() {
   try {
     const data = formRef.value.getFormData()
     const response = await addApi({
-      applicantId: authStore.userId,
       classroomId: data.classroomId!,
+      participantCount: data.participantCount,
       startTime: data.startTime,
       endTime: data.endTime,
       purpose: data.purpose,
