@@ -97,6 +97,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="purpose" label="用途" min-width="180" show-overflow-tooltip />
+        <el-table-column prop="participantCount" label="参与人数" min-width="100" />
         <el-table-column prop="status" label="状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="statusTagType[row.status as WorkflowStatus]" size="small">

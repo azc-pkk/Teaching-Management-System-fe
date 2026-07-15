@@ -67,6 +67,7 @@ async function fetchDetail() {
     currentStatus.value = data.status
     initialData.value = {
       classroomId: data.classroomId,
+      participantCount: data.participantCount,
       startTime: data.startTime,
       endTime: data.endTime,
       purpose: data.purpose,
@@ -91,6 +92,7 @@ async function handleSubmit() {
     const data = formRef.value.getFormData()
     const response = await patchApi(Number(requestId.value), {
       classroomId: data.classroomId,
+      participantCount: data.participantCount,
       startTime: data.startTime,
       endTime: data.endTime,
       purpose: data.purpose,
