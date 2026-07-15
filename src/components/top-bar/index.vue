@@ -14,7 +14,7 @@
       </span>
     </div>
 
-    <!-- 右侧：快捷操作 -->
+    <!-- 右侧：用户信息 + 退出 -->
     <nav class="flex items-center gap-1 text-sm">
       <a
         v-for="item in navItems"
@@ -29,50 +29,33 @@
       <!-- 分隔线 -->
       <div class="w-px h-5 bg-white/20 mx-3"></div>
 
-      <!-- 用户头像 / 下拉菜单 -->
-      <div class="relative group cursor-pointer">
-        <div
-          class="flex items-center gap-2 py-1 px-2 rounded-lg hover:bg-white/15 transition-colors"
-        >
-          <div
-            class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ring-1 ring-white/25"
-          >
-            <span class="text-xs">管理</span>
-          </div>
-          <span class="text-sm">管理员</span>
-          <el-icon class="text-xs transition-transform group-hover:rotate-180">
-            <ArrowDown />
-          </el-icon>
+      <!-- 用户信息 -->
+      <div class="flex items-center gap-2 text-white/90">
+        <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center ring-1 ring-white/25">
+          <span class="text-xs">{{ avatarText }}</span>
         </div>
-
-        <!-- 下拉菜单 -->
-        <ul
-          class="absolute right-0 top-full mt-1 w-44 bg-white text-gray-700 rounded-lg shadow-xl shadow-gray-900/10 ring-1 ring-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-1 group-hover:translate-y-0 transition-all z-30 overflow-hidden"
-        >
-          <li class="flex items-center gap-2 px-4 py-2.5 hover:bg-indigo-50 transition-colors">
-            <el-icon :size="15"><User /></el-icon>
-            <span class="text-sm">个人信息</span>
-          </li>
-          <li class="flex items-center gap-2 px-4 py-2.5 hover:bg-indigo-50 transition-colors">
-            <el-icon :size="15"><Setting /></el-icon>
-            <span class="text-sm">个人设置</span>
-          </li>
-          <li class="flex items-center gap-2 px-4 py-2.5 text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100 cursor-pointer" @click="handleLogout">
-            <el-icon :size="15"><SwitchButton /></el-icon>
-            <span class="text-sm">退出登录</span>
-          </li>
-        </ul>
+        <div class="text-left leading-tight">
+          <div class="text-sm font-medium">{{ authStore.displayName || '用户' }}</div>
+          <div class="text-xs text-white/60">{{ authStore.userName }}</div>
+        </div>
       </div>
+
+      <!-- 退出按钮 -->
+      <el-button
+        text
+        class="text-white/70! hover:text-white!"
+        @click="handleLogout"
+      >
+        <el-icon :size="16"><SwitchButton /></el-icon>
+      </el-button>
     </nav>
   </header>
 </template>
 
 <script lang="ts" setup>
+import { computed, onMounted } from 'vue'
 import {
   School,
-  ArrowDown,
-  User,
-  Setting,
   SwitchButton,
   Message,
 } from '@element-plus/icons-vue'
@@ -81,6 +64,11 @@ import { useAuthStore } from '@/store'
 
 const authStore = useAuthStore()
 const router = useRouter()
+
+const avatarText = computed(() => {
+  const name = authStore.displayName || '用户'
+  return name.slice(0, 2)
+})
 
 const navItems = [
   { name: '邮件', icon: Message },
@@ -95,4 +83,10 @@ function handleLogout() {
     })
     .catch(() => {})
 }
+
+onMounted(() => {
+  if (authStore.isLogin) {
+    authStore.fetchUserProfile()
+  }
+})
 </script>
