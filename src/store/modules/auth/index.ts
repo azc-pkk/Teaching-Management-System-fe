@@ -10,6 +10,10 @@ const useAuthStore = defineStore('auth', {
         accessToken: '',
     }),
 
+    persist: {
+        pick: ['accessToken', 'userId', 'role'],
+    },
+
     getters: {
         isLogin(state: AuthState): boolean {
             return !!state.accessToken;
